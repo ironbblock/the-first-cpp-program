@@ -1,7 +1,17 @@
-# include <stdio.h>
 # define N 3
 # define ABS(x)   (x>=0?x:-x)
 # define YiHao(a,b)   ((a)>0&&(b)<0||(a)<0&&(b)>0)
+#include <stdio.h>
+#include<iostream>
+#include<string>
+#include<cctype>
+#include<algorithm>
+#include<ctime>
+#include<cstdlib>
+#include<vector>
+#include<math.h>
+using namespace std;
+
 void change(long long* a, long long* b)//交换 a b的值
 {
     long long  c = *a;
@@ -26,23 +36,31 @@ long long  Dsum(long long  A[][N])//返回N阶行列式的值
 long long  A[N][N];
 long long  D[N][2], X[N], Y[N];
 long long  i, j, k, sum;
-#include<iostream>
-#include<string>
-#include<cctype>
-#include<algorithm>
-#include<ctime>
-#include<cstdlib>
-#include<vector>
-#include<math.h>
-using namespace std;
+
+const char Q = 'Q';
+const char O = 'O';
+const char EMPTY = ' ';
+const char TIE = 'T';
+const char NO_ONE = 'N';
+void instructions();
+char askYesNo(string question);
+int askNumber(string question, int high, int low = 0);
+char humanPiece();
+char opponent(char piece);
+void displayBoard(const vector<char>& board);
+char winner(const vector<char>& board);
+bool isLegal(const vector<char>& board,int move);
+int humanMove(const vector<char>& board,char human);
+int computerMove(vector<char> board,char computer);
+void annouceWinner(char winner, char computer, char human);
 int main()
 {
 	short input = 1;
 	while (input != 0)
 	{
-		cout << "\n\n输入0--5\n   0--退出\n   1--解一元二次方程\n   2--猜词\n   3--猜数字\n   4三角形求周长面积\n   5三个坐标求函数表达式\n";
+		cout << "\n\n输入0--6\n   0--退出\n   1--解一元二次方程\n   2--猜词\n   3--猜数字\n   4--三角形求周长面积\n   5--三个坐标求函数表达式\n   6--井字棋\n";
 		cin >> input;
-		if (input != 0 && input != 1 && input != 2 && input != 3 && input != 4 && input != 5)
+		if (input != 0 && input != 1 && input != 2 && input != 3 && input != 4 && input != 5 && input != 6)
 			cout << "亻尔女马\n";
 		else
 		{
@@ -70,8 +88,8 @@ int main()
 					else
 					{
 						x1 = (-b + sqrt(dlt)) / 2 / a;
-						x2 = (-b + sqrt(dlt)) / 2 / a;
-						cout << "x1=" << x1 << "x2=" << x2 << "\n";
+						x2 = (-b - sqrt(dlt)) / 2 / a;
+						cout << "x1=" << x1 << " x2=" << x2 << "\n";
 					}
 				}break;
 			case 2:
@@ -236,9 +254,178 @@ int main()
 					}
 					else printf("No answer!\n");
 			}
+			case 6:
+			{
+				int move;
+				const int NUM_SQUARES = 9;
+				vector<char> board(NUM_SQUARES, EMPTY);
+				instructions();
+				char human = humanPiece();
+				char computer = opponent(human);
+				char turn = Q;
+				displayBoard(board);
+				while (winner(board) == NO_ONE)
+				{
+					if (turn == human)
+					{
+						move = humanMove(board, human);
+						board[move] = human;
+					}
+					else
+					{
+						move = computerMove(board, computer);
+						board[move] = computer;
+					}
+					displayBoard(board);
+					turn = opponent(turn);
+				}
+				annouceWinner(winner(board), computer, human);
+			}
 			}
 		}
 	}
 	system("pause");
 	return 0;
+}
+void instructions()
+{
+	cout << "井字棋\n";
+	cout << "使用1--8来下棋\n";
+	cout << "对应于所需的棋盘的位置，如图所示\n";
+	cout << " 0 | 1 | 2\n";
+	cout << " ---------\n";
+	cout << " 3 | 4 | 5\n";
+	cout << " ---------\n";
+	cout << " 6 | 7 | 8\n";
+	cout << "自己做好准备,人类。战斗即将开始\n";
+}
+char askYesNo(string question)
+{
+	char response;
+	do
+	{
+		cout << question << "(y/n):";
+		cin >> response;
+	} while (response != 'y' && response != 'n');
+	return response;
+}
+int askNumber(string question, int high, int low)
+{
+	int number;
+	do
+	{
+		cout << question << " (" << low << " - " << high << "): ";
+		cin >> number;
+	} while (number > high || number < low);
+	return number;
+}
+char humanPiece()
+{
+	char go_first = askYesNo("do you want to move first?");
+	if (go_first == 'y')
+	{
+		cout << "go.\n";
+		return Q;
+	}
+	else
+	{
+		cout << "you will regret.\n";
+		return O;
+	}
+}
+char opponent(char piece)
+{
+	if (piece == 'X')
+		return O;
+	else
+		return Q;
+}
+void displayBoard(const vector<char>& board)
+{
+	cout << "\n\t" << board[0] << " | " << board[1] << " | " << board[2];
+	cout << "\n\t" << "---------\n";
+	cout << "\n\t" << board[3] << " | " << board[4] << " | " << board[5];
+	cout << "\n\t" << "---------\n";
+	cout << "\n\t" << board[6] << " | " << board[7] << " | " << board[8];
+	cout << "\n\n";
+}
+char winner(const vector<char>& board)
+{
+	const int WINNING_ROWS[8][3] = { {0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6} };
+	const int TOTAL_ROWS = 8;
+	for (int row = 0; row < TOTAL_ROWS; ++row)
+	{
+		if ((board[WINNING_ROWS[row][0]] != EMPTY) && (board[WINNING_ROWS[row][0]] == board[WINNING_ROWS[row][1]]) && (board[WINNING_ROWS[row][1]] == board[WINNING_ROWS[row][2]]))
+			return board[WINNING_ROWS[row][0]];
+	}
+	if (count(board.begin(), board.end(), EMPTY) == 0)
+		return	TIE;
+	return NO_ONE;
+}
+inline bool isLegal(int move, const vector<char>& board)
+{
+	return (board[move] == EMPTY);
+}
+int humanMove(const vector<char>& board, char human)
+{
+	int move = askNumber("where will you move?", (board.size() - 1));
+	while (!isLegal(move, board))
+	{
+		cout << "sb,gun.\n";
+		move = askNumber("where will you move?", (board.size() - 1));
+	}
+	cout << "fine...\n";
+	return move;
+}
+int computerMove(vector<char> board, char computer)
+{
+	unsigned int move = 0;
+	bool found = false;
+	while (!found && move < board.size())
+	{
+		if (isLegal(move, board))
+		{
+			board[move] = computer;
+			found = winner(board) == computer;
+			board[move] = EMPTY;
+		}
+		if (!found)
+			++move;
+	}
+	if (!found)
+	{
+		move = 0;
+		char human = opponent(computer);
+		if (isLegal(move, board))
+		{
+			board[move] = human;
+			found = winner(board) == human;
+			board[move] = EMPTY;
+		}
+		if (!found)
+			++move;
+	}
+	if (!found)
+	{
+		move = 0;
+		unsigned int i = 0; const int BEST_MOVES[] = { 4,0,2,6,8,1,3,5,7 };
+		while (!found && i < board.size())
+		{
+			move = BEST_MOVES[i];
+			if (isLegal(move, board))
+				found = true;
+			++i;
+		}
+	}
+	cout << "我应当采取平方数" << move;
+	return move;
+}
+void annouceWinner(char winner, char computer, char human)
+{
+	if (winner == computer)
+		cout << "lj,fw.\n";
+	else if (winner == human)
+		cout << "你赢了，你个畜生。\n";
+	else
+		cout << "平局，lj。\n";
 }
