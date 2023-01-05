@@ -204,7 +204,7 @@ int main()
 				for (i = 0; i < N; i++)
 				{
 					printf("输入第%d个点x y:", i + 1);
-					scanf_s("%d%d", &D[i][0], &D[i][1]);//输入点
+					scanf("%d%d", &D[i][0], &D[i][1]);//输入点
 					A[i][0] = D[i][0] * D[i][0];//求D 行列式
 					A[i][1] = D[i][0];
 					A[i][2] = 1;
@@ -253,7 +253,7 @@ int main()
 					printf("\n");
 				}
 				else printf("No answer!\n");
-			}
+			}break;
 			case 6:
 			{
 				int move;
@@ -280,7 +280,7 @@ int main()
 					turn = opponent(turn);
 				}
 				annouceWinner(winner(board), computer, human);
-			}
+			}break;
 			}
 		}
 	}
